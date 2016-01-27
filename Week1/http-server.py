@@ -99,9 +99,7 @@ def receive_request():
         print "req_method is None"
     
     conn.sendall(response)
-    print "Done sending response"
     s.close()
-    print "Closing socket"
 
 def get_method(request):
     req_method = None
