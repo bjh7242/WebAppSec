@@ -43,12 +43,15 @@ Server: Microsoft-IIS/5.0
     else:
         temp = string.replace(headers,"#COOKIE","")
         headers = string.replace(temp,"\n\n<html>","\n<html>")
+
+    # set the value to be printed out from the data parameter
     bodytemp = string.replace(body,"#DATA",data)
+
+    # if HEAD request, don't print the body
     if request_type == "HEAD":
         resp = headers
     else:
         resp = headers + bodytemp
-    print resp
     return resp
 
 def receive_request():
@@ -85,11 +88,13 @@ def receive_request():
             # build response contents
             response = serve_data(cookie, data,"GET")
     elif req_method == "POST":
-        pass
+        data = ""
+        response = serve_data(cookie, data,"POST")
     elif req_method == "HEAD":
-        pass
+        data = ""
+        response = serve_data(cookie, data,"HEAD")
     elif req_method == "OPTIONS":
-        pass
+        response = serve_data(cookie, data,"OPTIONS")
     elif req_method == "TRACE":
         print "METHOD IS TRACE"
         response = req
