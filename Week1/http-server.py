@@ -17,7 +17,7 @@ import sys
 import random
 
 HOST = ""			# listen on all interfaces
-PORT = 8080			# port to listen on
+PORT = 8081			# port to listen on
 
 def serve_data(cookie,data,request_type):
     """
@@ -36,11 +36,12 @@ Server: Microsoft-IIS/5.0
 </body>
 </html>
 """
+    # if cookie does not exist, add one; else don't add cookie header
     if cookie is None:
-        print "SETTING COOKIE..."
         cookie = "Set-Cookie: cookie_monster=" + set_cookie()
-        print "Cookie is " + cookie
-    temp = string.replace(temp,"#COOKIE",cookie)
+    else:
+        temp = string.replace(temp,"#COOKIE","")
+        temp = string.replace(temp,"\n\n<html>","\n<html>")
     resp = string.replace(temp,"#DATA",data)
     print resp
     return resp
@@ -102,7 +103,7 @@ def receive_request():
 
 def get_cookie(request):
     cookie = None
-    cookie_regex = re.match("Cookie: (.*)",request)
+    cookie_regex = re.search("Cookie: (.*)",request)
     if cookie_regex is not None:
         cookie = cookie_regex.group(1)
     print "Cookie is " + str(cookie)
