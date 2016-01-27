@@ -39,6 +39,7 @@ Server: Microsoft-IIS/5.0
     # if cookie does not exist, add one; else don't add cookie header
     if cookie is None:
         cookie = "Set-Cookie: cookie_monster=" + set_cookie()
+        temp = string.replace(temp,"#COOKIE",cookie)
     else:
         temp = string.replace(temp,"#COOKIE","")
         temp = string.replace(temp,"\n\n<html>","\n<html>")
