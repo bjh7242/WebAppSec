@@ -17,7 +17,7 @@ import sys
 import random
 
 HOST = ""			# listen on all interfaces
-PORT = 8081			# port to listen on
+PORT = 8080			# port to listen on
 
 def serve_data(cookie,data,request_type):
     """
@@ -66,14 +66,11 @@ def receive_request():
     if not req:
         sys.exit()
     print req
+
     # get_cookie returns None if there is no value for a cookie
     cookie = get_cookie(req)
+    req_method = get_method(req)
 
-    # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-    method_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",req)
-    # create string from regex object
-    req_method =  method_regex.group(0)
-    print "req_method is " + req_method
     # re.search returns None if no match
     if req_method == "GET":
         # extract the value of the data parameter passed in a GET request
@@ -101,12 +98,21 @@ def receive_request():
     s.close()
     print "Closing socket"
 
+def get_method(request):
+    req_method = None
+
+    # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    method_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",request)
+    # create string from regex object
+    req_method =  method_regex.group(0)
+    return req_method
+
 def get_cookie(request):
     cookie = None
     cookie_regex = re.search("Cookie: (.*)",request)
     if cookie_regex is not None:
         cookie = cookie_regex.group(1)
-    print "Cookie is " + str(cookie)
+    #print "Cookie is " + str(cookie)
     return cookie 
 
 def set_cookie():
