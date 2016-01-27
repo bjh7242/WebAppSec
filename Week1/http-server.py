@@ -13,6 +13,7 @@
 import socket
 import re
 import string
+import sys
 
 HOST = ""			# listen on all interfaces
 PORT = 8080			# port to listen on
@@ -20,10 +21,10 @@ PORT = 8080			# port to listen on
 def serve_data(cookie,data,request_type):
     """
     serve_data takes a cookie and a data value (from a POST or GET request) and serves it to a client
+Cookie: #COOKIE
     """
     temp = """HTTP/1.1 200 OK
 Server: Microsoft-IIS/5.0
-Cookie: #COOKIE
 
 <html>
 <head>
@@ -39,28 +40,57 @@ Cookie: #COOKIE
     print resp
     return resp
 
-def get_request():
+def receive_request():
+    response = "" 
+
     # create socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST,PORT))
-    s.listen(1)			# listen with 1 queued connection
+    try:
+        s.bind((HOST,PORT))
+        s.listen(1)			# listen with 1 queued connection
+    except socket.error as msg:
+        s.close()
+        s = None
+        print msg
+        sys.exit()
+
     conn, addr = s.accept()
     print "Connection from address: " + str(addr)
-    while True:
-        req = conn.recv(1024)
-        if not req:
-            break
-        print req
+    req = conn.recv(1024)
+    if not req:
+        sys.exit()
+    print req
 
-        # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-        method = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",req)
-        print method.group(0)
-        # re.search returns None if no match
-        if method is None:
-            # should return 405 here
-            pass
-        print str(method)
+    # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    method_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",req)
+    # create string from regex object
+    req_method =  method_regex.group(0)
+    print "req_method is " + req_method
+    # re.search returns None if no match
+    if req_method == "GET":
+        # extract the value of the data parameter passed in a GET request
+        data_regex = re.search("\?data=(.*)HTTP",req)
+        if data_regex is not None:
+            data = data_regex.group(1)
+            # build response contents
+            response = serve_data("lolcookie",data,"GET")
+    elif req_method == "POST":
+        pass
+    elif req_method == "HEAD":
+        pass
+    elif req_method == "OPTIONS":
+        pass
+    elif req_method == "TRACE":
+        print "METHOD IS TRACE"
+        response = req
+        print response
+    elif req_method is None:
+        # should return 405 here
+        print "req_method is None"
+    
+    conn.sendall(response)
+    print "Done sending response"
+    s.close()
+    print "Closing socket"
 
-    serve_data("lolcookie","loldata","GET")
-
-get_request()
+receive_request()
