@@ -14,7 +14,10 @@ import socket
 import re
 import string
 
-def serve_data(cookie,data):
+HOST = ""			# listen on all interfaces
+PORT = 8080			# port to listen on
+
+def serve_data(cookie,data,request_type):
     """
     serve_data takes a cookie and a data value (from a POST or GET request) and serves it to a client
     """
@@ -37,7 +40,27 @@ Cookie: #COOKIE
     return resp
 
 def get_request():
-    # do some stuff here
-    serve_data("lolcookie","loldata")
+    # create socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((HOST,PORT))
+    s.listen(1)			# listen with 1 queued connection
+    conn, addr = s.accept()
+    print "Connection from address: " + str(addr)
+    while True:
+        req = conn.recv(1024)
+        if not req:
+            break
+        print req
+
+        # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+        method = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",req)
+        print method.group(0)
+        # re.search returns None if no match
+        if method is None:
+            # should return 405 here
+            pass
+        print str(method)
+
+    serve_data("lolcookie","loldata","GET")
 
 get_request()
