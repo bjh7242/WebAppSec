@@ -23,11 +23,11 @@ def serve_data(cookie,data,request_type):
     """
     serve_data takes a cookie and a data value (from a POST or GET request) and serves it to a client
     """
-    temp = """HTTP/1.1 200 OK
+    headers = """HTTP/1.1 200 OK
 Server: Microsoft-IIS/5.0
 #COOKIE
-
-<html>
+"""
+    body = """<html>
 <head>
 <title>SPARSA</title>
 </head>
@@ -39,11 +39,15 @@ Server: Microsoft-IIS/5.0
     # if cookie does not exist, add one; else don't add cookie header
     if cookie is None:
         cookie = "Set-Cookie: cookie_monster=" + set_cookie()
-        temp = string.replace(temp,"#COOKIE",cookie)
+        headers = string.replace(headers,"#COOKIE",cookie + "\n")
     else:
-        temp = string.replace(temp,"#COOKIE","")
-        temp = string.replace(temp,"\n\n<html>","\n<html>")
-    resp = string.replace(temp,"#DATA",data)
+        temp = string.replace(headers,"#COOKIE","")
+        headers = string.replace(temp,"\n\n<html>","\n<html>")
+    bodytemp = string.replace(body,"#DATA",data)
+    if request_type == "HEAD":
+        resp = headers
+    else:
+        resp = headers + bodytemp
     print resp
     return resp
 
@@ -119,4 +123,5 @@ def get_cookie(request):
 def set_cookie():
     return ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
 
-receive_request()
+if __name__ == '__main__':
+    receive_request()
