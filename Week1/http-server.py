@@ -14,6 +14,7 @@ import socket
 import re
 import string
 import sys
+import random
 
 HOST = ""			# listen on all interfaces
 PORT = 8080			# port to listen on
@@ -21,10 +22,10 @@ PORT = 8080			# port to listen on
 def serve_data(cookie,data,request_type):
     """
     serve_data takes a cookie and a data value (from a POST or GET request) and serves it to a client
-Cookie: #COOKIE
     """
     temp = """HTTP/1.1 200 OK
 Server: Microsoft-IIS/5.0
+#COOKIE
 
 <html>
 <head>
@@ -35,7 +36,11 @@ Server: Microsoft-IIS/5.0
 </body>
 </html>
 """
-    resp = string.replace(temp,"#COOKIE",cookie)
+    if cookie is None:
+        print "SETTING COOKIE..."
+        cookie = "Set-Cookie: cookie_monster=" + set_cookie()
+        print "Cookie is " + cookie
+    temp = string.replace(temp,"#COOKIE",cookie)
     resp = string.replace(temp,"#DATA",data)
     print resp
     return resp
@@ -60,6 +65,8 @@ def receive_request():
     if not req:
         sys.exit()
     print req
+    # get_cookie returns None if there is no value for a cookie
+    cookie = get_cookie(req)
 
     # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     method_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",req)
@@ -73,7 +80,7 @@ def receive_request():
         if data_regex is not None:
             data = data_regex.group(1)
             # build response contents
-            response = serve_data("lolcookie",data,"GET")
+            response = serve_data(cookie, data,"GET")
     elif req_method == "POST":
         pass
     elif req_method == "HEAD":
@@ -92,5 +99,16 @@ def receive_request():
     print "Done sending response"
     s.close()
     print "Closing socket"
+
+def get_cookie(request):
+    cookie = None
+    cookie_regex = re.match("Cookie: (.*)",request)
+    if cookie_regex is not None:
+        cookie = cookie_regex.group(1)
+    print "Cookie is " + str(cookie)
+    return cookie 
+
+def set_cookie():
+    return ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(32)])
 
 receive_request()
