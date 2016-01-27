@@ -17,7 +17,7 @@ import sys
 import random
 
 HOST = ""			# listen on all interfaces
-PORT = 8080			# port to listen on
+PORT = 8081			# port to listen on
 
 def serve_data(cookie,data,request_type):
     """
@@ -36,6 +36,7 @@ Server: Microsoft-IIS/5.0
 </body>
 </html>
 """
+    print "METHOD IS " + request_type
     # if cookie does not exist, add one; else don't add cookie header
     if cookie is None:
         cookie = "Set-Cookie: cookie_monster=" + set_cookie()
@@ -68,42 +69,52 @@ def receive_request():
         print msg
         sys.exit()
 
-    conn, addr = s.accept()
-    print "Connection from address: " + str(addr)
-    req = conn.recv(1024)
-    if not req:
-        sys.exit()
-    print req
-
-    # get_cookie returns None if there is no value for a cookie
-    cookie = get_cookie(req)
-    req_method = get_method(req)
-
-    # re.search returns None if no match
-    if req_method == "GET":
-        # extract the value of the data parameter passed in a GET request
-        data_regex = re.search("\?data=(.*)HTTP",req)
-        if data_regex is not None:
-            data = data_regex.group(1)
-            # build response contents
-            response = serve_data(cookie, data,"GET")
-    elif req_method == "POST":
-        data = ""
-        response = serve_data(cookie, data,"POST")
-    elif req_method == "HEAD":
-        data = ""
-        response = serve_data(cookie, data,"HEAD")
-    elif req_method == "OPTIONS":
-        response = serve_data(cookie, data,"OPTIONS")
-    elif req_method == "TRACE":
-        print "METHOD IS TRACE"
-        response = req
-        print response
-    elif req_method is None:
-        # should return 405 here
-        print "req_method is None"
+    while True:
+        try:
+            conn, addr = s.accept()
+            print "Connection from address: " + str(addr)
     
-    conn.sendall(response)
+            req = conn.recv(1024)
+            if not req:
+                break
+            print req
+
+            # get_cookie returns None if there is no value for a cookie
+            cookie = get_cookie(req)
+            req_method = get_method(req)
+
+            # re.search returns None if no match
+            if req_method == "GET":
+                # extract the value of the data parameter passed in a GET request
+                data_regex = re.search("\?data=(.*)HTTP",req)
+                if data_regex is not None:
+                    data = data_regex.group(1)
+                    # build response contents
+                    response = serve_data(cookie, data,"GET")
+            elif req_method == "POST":
+                data = ""
+                response = serve_data(cookie, data,"POST")
+            elif req_method == "HEAD":
+                data = ""
+                response = serve_data(cookie, data,"HEAD")
+            elif req_method == "OPTIONS":
+                response = serve_data(cookie, data,"OPTIONS")
+            elif req_method == "TRACE":
+                print "METHOD IS TRACE"
+                response = req
+                print response
+            elif req_method is None:
+                # should return 405 here
+                print "req_method is None"
+            
+            print "about to sendall"
+            conn.sendall(response)
+            print "done with sendall"
+            conn.close()
+        except KeyboardInterrupt:
+            print "CTRL-C received. Quitting."
+            break
+            #sys.exit()
     s.close()
 
 def get_method(request):
