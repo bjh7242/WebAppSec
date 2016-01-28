@@ -36,7 +36,6 @@ Server: Microsoft-IIS/5.0
 </body>
 </html>
 """
-    print "METHOD IS " + request_type
     # if cookie does not exist, add one; else don't add cookie header
     if cookie is None:
         cookie = "Set-Cookie: cookie_monster=" + set_cookie()
@@ -51,6 +50,13 @@ Server: Microsoft-IIS/5.0
     # if HEAD request, don't print the body
     if request_type == "HEAD":
         resp = headers
+    # if OPTIONS request, only return allowed verbs
+    elif request_type == "OPTIONS":
+        resp = """HTTP/1.1 200 Ok
+Allow: OPTIONS, GET, HEAD, POST, TRACE
+Content-Length: 0
+
+"""
     else:
         resp = headers + bodytemp
     return resp
@@ -98,18 +104,16 @@ def receive_request():
                 data = ""
                 response = serve_data(cookie, data,"HEAD")
             elif req_method == "OPTIONS":
+                data = ""
                 response = serve_data(cookie, data,"OPTIONS")
             elif req_method == "TRACE":
-                print "METHOD IS TRACE"
                 response = req
-                print response
             elif req_method is None:
                 # should return 405 here
                 print "req_method is None"
             
-            print "about to sendall"
+            print "PRINTING RESPONSE:\n" + response
             conn.sendall(response)
-            print "done with sendall"
             conn.close()
         except KeyboardInterrupt:
             print "CTRL-C received. Quitting."
@@ -131,7 +135,6 @@ def get_cookie(request):
     cookie_regex = re.search("Cookie: (.*)",request)
     if cookie_regex is not None:
         cookie = cookie_regex.group(1)
-    #print "Cookie is " + str(cookie)
     return cookie 
 
 def set_cookie():
