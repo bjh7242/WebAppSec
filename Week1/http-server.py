@@ -54,7 +54,6 @@ Server: nginx/1.6.2
         headers = string.replace(temp,"\n\n<html>","\n<html>")
 
     # set the value to be printed out from the data parameter
-    print "changing #DATA to: " + data
     bodytemp = string.replace(body,"#DATA",data)
 
     # if HEAD request, don't print the body
@@ -166,7 +165,6 @@ def get_page(request):
         page = page_regex.group(0)
     except:
         page = ""
-    print "PAGE IS: " + page
     return page[1:]
 
 if __name__ == '__main__':
