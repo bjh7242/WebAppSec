@@ -45,6 +45,7 @@ Server: Microsoft-IIS/5.0
         headers = string.replace(temp,"\n\n<html>","\n<html>")
 
     # set the value to be printed out from the data parameter
+    print "changing #DATA to: " + data
     bodytemp = string.replace(body,"#DATA",data)
 
     # if HEAD request, don't print the body
@@ -98,8 +99,12 @@ def receive_request():
                     # build response contents
                     response = serve_data(cookie, data,"GET")
             elif req_method == "POST":
-                data = ""
-                response = serve_data(cookie, data,"POST")
+                # extract the value of the data parameter passed in a GET request
+                data_regex = re.search("data=(.*)$",req)
+                if data_regex is not None:
+                    data = data_regex.group(1)
+                    # build response contents
+                    response = serve_data(cookie, data,"POST")
             elif req_method == "HEAD":
                 data = ""
                 response = serve_data(cookie, data,"HEAD")
