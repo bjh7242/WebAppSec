@@ -27,15 +27,6 @@ def serve_data(page,cookie,data,request_type):
 Server: Microsoft-IIS/5.0
 #COOKIE
 """
-#    body = """<html>
-#<head>
-#<title>SPARSA</title>
-#</head>
-#<body>
-##DATA
-#</body>
-#</html>
-#"""
     try:
         with open(page) as f:
             body = f.read()
@@ -81,7 +72,6 @@ Content-Length: 0
     return resp
 
 def receive_request():
-    response = "" 
 
     # create socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,6 +85,7 @@ def receive_request():
         sys.exit()
 
     while True:
+        response = "" 
         try:
             conn, addr = s.accept()
             print "Connection from address: " + str(addr)
@@ -111,19 +102,21 @@ def receive_request():
 
             # re.search returns None if no match
             if req_method == "GET":
+                data = ""
                 # extract the value of the data parameter passed in a GET request
-                data_regex = re.search("\?data=(.*)HTTP",req)
+                data_regex = re.search("\?data=(.*) HTTP",req)
                 if data_regex is not None:
                     data = data_regex.group(1)
                     # build response contents
-                    response = serve_data(page, cookie, data,"GET")
+                response = serve_data(page, cookie, data,"GET")
             elif req_method == "POST":
+                data = ""
                 # extract the value of the data parameter passed in a GET request
                 data_regex = re.search("data=(.*)$",req)
                 if data_regex is not None:
                     data = data_regex.group(1)
                     # build response contents
-                    response = serve_data(page, cookie, data,"POST")
+                response = serve_data(page, cookie, data,"POST")
             elif req_method == "HEAD":
                 data = ""
                 response = serve_data(page, cookie, data,"HEAD")
@@ -148,7 +141,7 @@ def receive_request():
 def get_method(request):
     req_method = None
 
-    # methods = case insensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    # methods = case sensitive https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
     method_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE)",request)
     # create string from regex object
     req_method =  method_regex.group(0)
@@ -166,11 +159,15 @@ def set_cookie():
 
 def get_page(request):
     # some shit
-    page_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE) /(\w*\.\w*)",request)
-    print page_regex.groups()
-    page = page_regex.group(2)
-    print page
-    return page
+    #page_regex = re.search("^(GET|POST|OPTIONS|HEAD|TRACE) (/\w*\.\w*)",request)
+    page_regex = re.search("/(\w*\.\w*)",request)
+    try:
+        #print page_regex.groups()
+        page = page_regex.group(0)
+    except:
+        page = ""
+    print "PAGE IS: " + page
+    return page[1:]
 
 if __name__ == '__main__':
     receive_request()
