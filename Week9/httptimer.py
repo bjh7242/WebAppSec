@@ -72,11 +72,12 @@ def makerequest(guess):
     n = 0
 
     # sort the characters based on the average time
+    print "Average time per request for each password guess"
     for key, value in sorted(chartimeavg.iteritems(), key=lambda (k,v): (v,k)):
         print "%s: %s" % (key, value)
         if n == len(chartimeavg.keys())-1:
             newguess = guess + key
-            print "Guessing password is: " + newguess
+            print "Guessing password begins with: '" + newguess + "'"
             return newguess
         n += 1
 
