@@ -21,7 +21,7 @@ CHARSET = 'abcde'
 FAILLOGINMESSAGE = 'Invalid username/password combination'
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 250
+NUMREQUESTS = 300
 
 # POST parameter variable names
 USERNAMEPOSTPARAM = 'username'
@@ -105,7 +105,7 @@ def getaverage(chartimes):
 if __name__ == '__main__':
     temppass = ''
 
-    print "Attempting to login into " + URL + " as user '" + USERNAME + "'"
+    print "Attempting to log into " + URL + " as user '" + USERNAME + "'"
     print "Character set is: " + CHARSET
     print "Failed login message is: 'Invalid username/password combination'"
     print "----------------------------------------------------------------\n"

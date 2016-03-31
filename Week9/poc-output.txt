@@ -1,0 +1,42 @@
+Attempting to log into http://localhost:3000/login as user 'test'
+Character set is: abcde
+Failed login message is: 'Invalid username/password combination'
+----------------------------------------------------------------
+
+Sending 300 requests to the server for the password 'a'
+Total time to make 300 requests for 'a' was 14.5899403095 seconds.
+Sending 300 requests to the server for the password 'b'
+Total time to make 300 requests for 'b' was 14.5746262074 seconds.
+Sending 300 requests to the server for the password 'c'
+Total time to make 300 requests for 'c' was 14.5548858643 seconds.
+Sending 300 requests to the server for the password 'd'
+Total time to make 300 requests for 'd' was 14.5348436832 seconds.
+Sending 300 requests to the server for the password 'e'
+Total time to make 300 requests for 'e' was 14.5663957596 seconds.
+Average time per request for each password guess
+d: 0.0484494789441
+c: 0.0485162862142
+e: 0.0485546525319
+b: 0.0485820873578
+a: 0.0486331343651
+Guessing password begins with: 'a'
+Sending 300 requests to the server for the password 'aa'
+Total time to make 300 requests for 'a' was 14.5625724792 seconds.
+Sending 300 requests to the server for the password 'ab'
+Total time to make 300 requests for 'b' was 14.5665872097 seconds.
+Sending 300 requests to the server for the password 'ac'
+Total time to make 300 requests for 'c' was 14.5622253418 seconds.
+Sending 300 requests to the server for the password 'ad'
+Total time to make 300 requests for 'd' was 14.5503232479 seconds.
+Sending 300 requests to the server for the password 'ae'
+Total time to make 300 requests for 'e' was 14.5625009537 seconds.
+Average time per request for each password guess
+d: 0.048501077493
+c: 0.0485407511393
+e: 0.0485416698456
+a: 0.0485419082642
+b: 0.048555290699
+Guessing password begins with: 'ab'
+Sending 300 requests to the server for the password 'aba'
+Successfully logged in! Username: test Password: aba
+
