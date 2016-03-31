@@ -18,7 +18,7 @@ CHARSET = 'abcde'
 PASSWORD = ''
 
 # set to be the number of requests to set to the server for every character
-NUMREQUESTS = 10
+NUMREQUESTS = 1000
 
 def makerequest():
     '''
@@ -39,7 +39,7 @@ def makerequest():
         chartimes[c] = 0.0
 
         print "Sending " + str(NUMREQUESTS) + " requests to the server for the character " + c
-        parameters = {'username': USERNAME, 'password': 'ab'}
+        parameters = {'username': USERNAME, 'password': c}
         for i in range(0,NUMREQUESTS):
             start = time.time()
             # make request
@@ -56,9 +56,10 @@ def makerequest():
 
     # sort the characters based on the average time
     for key, value in sorted(chartimeavg.iteritems(), key=lambda (k,v): (v,k)):
-        if n < 1:
-            print "%s: %s" % (key, value)
-        n += 1
+        print "%s: %s" % (key, value)
+        #if n < 1:
+        #    print "%s: %s" % (key, value)
+        #n += 1
 
 
 
@@ -76,6 +77,7 @@ def getaverage(chartimes):
 
     # get average time for each request for every character
     for char in chartimes:
+        print "Total time to make " + str(NUMREQUESTS) + " requests for " + char + " was " + str(chartimes[char]) + " seconds."
         chartimeavg[char] = chartimes[char]/NUMREQUESTS
 
     return chartimeavg
